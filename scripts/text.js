@@ -1,12 +1,23 @@
 const algorithmia = require("algorithmia");
 const algorithmiaApiKey = require("../credentials/algorithmia.json").api_key;
 const sentenceBoundaryDetection = require("sbd");
+const watsonApiKey = require("../credentials/watson-nlu.json").apikey;
+
+const NaturalLanguageUnderstandingV1 = require("watson-developer-cloud/natural-language-understanding/v1");
+
+const nlu = new NaturalLanguageUnderstandingV1({
+  iam_apikey: watsonApiKey,
+  version: "2018-04-05",
+  url: "https://gateway.watsonplatform.net/natural-language-understanding/api/",
+});
 
 const text = async (content) => {
+  content.maximumSentences = 7;
   content.sourceContentOriginal = await fetchContentFromWikipedia(content);
   content.sourceContentSanitized = sanitizeContent(content);
   content.sentences = breakContentIntoSentences(content);
-  console.log(content.sentences);
+  content.sentences = limitMaximumSentences(content);
+  content.sentences = await fetchKeywordsOfAllSentences(content);
 };
 
 const fetchContentFromWikipedia = async (content) => {
@@ -15,8 +26,7 @@ const fetchContentFromWikipedia = async (content) => {
     "web/WikipediaParser/0.1.2"
   );
   const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm);
-  const wikipediaContent = wikipediaResponse.get();
-
+  const wikipediaContent = await wikipediaResponse.get();
   return wikipediaContent.content;
 };
 
@@ -62,6 +72,38 @@ const breakContentIntoSentences = (content) => {
   });
 
   return arrayTemp;
+};
+
+const limitMaximumSentences = (content) => {
+  return content.sentences.slice(0, content.maximumSentences);
+};
+
+const fetchKeywordsOfAllSentences = async (content) => {
+  for (const sentence of content.sentences) {
+    sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text);
+  }
+  return content.sentences;
+};
+
+const fetchWatsonAndReturnKeywords = async (sentence) => {
+  return new Promise((resolve, reject) => {
+    nlu.analyze(
+      {
+        text: sentence,
+        features: {
+          keywords: {},
+        },
+      },
+      function (err, response) {
+        if (err) {
+          throw err;
+        } else {
+          const keywords = response.keywords.map((keyword) => keyword.text);
+          resolve(keywords);
+        }
+      }
+    );
+  });
 };
 
 module.exports = text;
