@@ -1,0 +1,19 @@
+{
+  "name": "video-maker",
+  "version": "1.0.0",
+  "description": "O projeto consiste em buscar texto, processar imagens e renderizar um vídeo para o youtube através de alguns inputs do usuário. Este projeto é baseado em cima de uma poc já existente criada pelo filipe deschamps, porém tudo aqui é criado por mim mesmo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaacmirandacampos/video-maker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/isaacmirandacampos/video-maker/issues"
+  },
+  "homepage": "https://github.com/isaacmirandacampos/video-maker#readme"
+}
