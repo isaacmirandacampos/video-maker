@@ -1,7 +1,12 @@
-const input = require("./scripts/input");
-const start = () => {
-  const content = input();
+const scripts = {
+  input: require("./scripts/input"),
+  text: require("./scripts/text"),
+};
+
+const start = async () => {
+  const content = scripts.input();
   console.log(content);
+  await scripts.text(content);
 };
 
 start();
