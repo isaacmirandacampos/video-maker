@@ -5,7 +5,6 @@ const scripts = {
 
 const start = async () => {
   const content = scripts.input();
-  console.log(content);
   await scripts.text(content);
 };
 
