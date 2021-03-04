@@ -1,7 +1,9 @@
 const algorithmia = require("algorithmia");
+
 const algorithmiaApiKey = require("../credentials/algorithmia.json").api_key;
 const sentenceBoundaryDetection = require("sbd");
 const watsonApiKey = require("../credentials/watson-nlu.json").apikey;
+const state = require("./state");
 
 const NaturalLanguageUnderstandingV1 = require("watson-developer-cloud/natural-language-understanding/v1");
 
@@ -11,13 +13,15 @@ const nlu = new NaturalLanguageUnderstandingV1({
   url: "https://gateway.watsonplatform.net/natural-language-understanding/api/",
 });
 
-const text = async (content) => {
-  content.maximumSentences = 7;
+const text = async () => {
+  const content = state.load();
+
   content.sourceContentOriginal = await fetchContentFromWikipedia(content);
   content.sourceContentSanitized = sanitizeContent(content);
   content.sentences = breakContentIntoSentences(content);
   content.sentences = limitMaximumSentences(content);
   content.sentences = await fetchKeywordsOfAllSentences(content);
+  state.save(content);
 };
 
 const fetchContentFromWikipedia = async (content) => {
@@ -26,7 +30,7 @@ const fetchContentFromWikipedia = async (content) => {
     "web/WikipediaParser/0.1.2"
   );
   const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm);
-  const wikipediaContent = await wikipediaResponse.get();
+  const wikipediaContent = wikipediaResponse.get();
   return wikipediaContent.content;
 };
 

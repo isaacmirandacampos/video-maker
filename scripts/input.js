@@ -1,12 +1,13 @@
 const readlineSync = require("readline-sync");
+const state = require("./state");
 
 const input = () => {
-  const content = {};
-
+  const content = {
+    maximumSentences: 7,
+  };
   content.searchTerm = askAndReturnSearchTerm();
   content.prefix = askAndReturnPrefix();
-
-  return content;
+  state.save(content);
 };
 
 const askAndReturnSearchTerm = () => {

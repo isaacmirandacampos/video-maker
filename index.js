@@ -1,11 +1,15 @@
 const scripts = {
   input: require("./scripts/input"),
   text: require("./scripts/text"),
+  state: require("./scripts/state"),
 };
 
 const start = async () => {
-  const content = scripts.input();
-  await scripts.text(content);
+  scripts.input();
+  await scripts.text();
+  const content = scripts.state.load();
+
+  console.dir(content, { depth: null });
 };
 
 start();
