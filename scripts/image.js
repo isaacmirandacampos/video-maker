@@ -3,13 +3,12 @@ const imageDownloader = require("image-downloader");
 const state = require("./state");
 const googleSearchCredentials = require("../credentials/google-search.json");
 const customSearch = google.customsearch("v1");
+
 const image = async () => {
   let content = state.load();
-
-  // content = await fetchImagesOfAllSentences(content);
+  content = await fetchImagesOfAllSentences(content);
   await downloadAllImages(content);
-  // tate.save(content);
-  process.exit(0);
+  state.save(content);
 };
 
 const fetchImagesOfAllSentences = async (content) => {
@@ -17,7 +16,6 @@ const fetchImagesOfAllSentences = async (content) => {
     const query = `${content.searchTerm} ${sentence.keywords[0]}`;
 
     sentence.images = await fetchGoogleAndReturnImagesLinks(query);
-
     sentence.googleSearchQuery = query;
   }
   return content;
@@ -69,12 +67,11 @@ const downloadAllImages = async (content) => {
   }
 };
 
-const downloadAndSave = (url, fileName) => {
-  return imageDownloader.image({
+const downloadAndSave = (url, fileName) =>
+  imageDownloader.image({
     url,
     url,
     dest: `./content/${fileName}`,
   });
-};
 
 module.exports = image;
