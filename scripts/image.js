@@ -1,4 +1,5 @@
 const google = require("googleapis").google;
+
 const imageDownloader = require("image-downloader");
 const state = require("./state");
 const googleSearchCredentials = require("../credentials/google-search.json");
@@ -12,25 +13,29 @@ const image = async () => {
 };
 
 const fetchImagesOfAllSentences = async (content) => {
+  console.log("> Buscando imagens");
   for (const sentence of content.sentences) {
     const query = `${content.searchTerm} ${sentence.keywords[0]}`;
 
-    sentence.images = await fetchGoogleAndReturnImagesLinks(query);
+    sentence.images = await fetchGoogleAndReturnImagesLinks(query, content);
     sentence.googleSearchQuery = query;
   }
+  console.log("> Imagens encontradas");
   return content;
 };
 
 const fetchGoogleAndReturnImagesLinks = async (query) => {
+  console.log(`> Pegando imagem com a query: ${query}`);
+
   const response = await customSearch.cse.list({
     auth: googleSearchCredentials.apiKey,
     cx: googleSearchCredentials.searchEngineId,
     q: query,
     searchType: "image",
-    num: 2,
+    num: 4,
   });
 
-  return response.data.items.map((item) => item.link);
+  return response?.data?.items?.map((item) => item?.link);
 };
 
 const downloadAllImages = async (content) => {

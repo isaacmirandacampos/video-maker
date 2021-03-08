@@ -17,12 +17,17 @@
   },
   "homepage": "https://github.com/isaacmirandacampos/video-maker#readme",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffprobe-installer/ffprobe": "^1.1.0",
     "algorithmia": "^0.3.10",
+    "fluent-ffmpeg": "^2.1.2",
     "gm": "^1.23.1",
     "googleapis": "^67.1.1",
     "image-downloader": "^4.0.2",
     "readline-sync": "^1.4.10",
     "sbd": "^1.0.18",
-    "watson-developer-cloud": "^4.0.1"
+    "videoshow": "^0.1.12",
+    "watson-developer-cloud": "^4.0.1",
+    "wikipedia": "^1.0.3"
   }
 }

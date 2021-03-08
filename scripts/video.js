@@ -1,16 +1,27 @@
 const gm = require("gm").subClass({ imageMagick: true });
 const path = require("path");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const ffprobePath = require("@ffprobe-installer/ffprobe").path;
+const videoshow = require("videoshow");
+let ffmpeg = require("fluent-ffmpeg");
 
 const state = require("./state");
-
 const rootPath = path.resolve(__dirname, "..");
+const audioPath = path.join(__dirname, "../templates/2/newsroom.mp3");
+const videoPath = path.join(__dirname, "../content/output.mp4");
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
+
 const fromRoot = (relPath) => path.resolve(rootPath, relPath);
 
 const video = async () => {
   let content = state.load();
-  // await convertAllImages(content);
-  // await createAllSentenceImages(content);
+  await convertAllImages(content);
+  await createAllSentenceImages(content);
   await createThumbnail();
+  await createVideo();
+  await renderVideoWithFFmpeg(content);
 };
 
 const convertAllImages = async (content) => {
@@ -141,5 +152,79 @@ const createThumbnail = async () => {
       });
   });
 };
+
+async function createVideo(content) {
+  await state.saveScript(content);
+}
+
+async function renderVideoWithFFmpeg(content) {
+  return new Promise((resolve, reject) => {
+    let images = [
+      {
+        path: `./content/intro.jpg`,
+        caption: `${content.prefix} ${content.searchTerm}`,
+      },
+    ];
+
+    for (
+      let sentenceIndex = 0;
+      sentenceIndex < content.sentences.length;
+      sentenceIndex++
+    ) {
+      images.push({
+        path: `./content/${sentenceIndex}-converted.png`,
+        caption: content.sentences[sentenceIndex].text,
+      });
+    }
+
+    const videoOptions = {
+      fps: 25,
+      loop: 10, // seconds
+      transition: true,
+      transitionDuration: 1, // seconds
+      videoBitrate: 1024,
+      videoCodec: "libx264",
+      size: "1920x1080",
+      audioBitrate: "128k",
+      audioChannels: 2,
+      format: "mp4",
+      pixelFormat: "yuv420p",
+      useSubRipSubtitles: false, // Use ASS/SSA subtitles instead
+      subtitleStyle: {
+        Fontname: "Verdana",
+        Fontsize: "50",
+        PrimaryColour: "16777215",
+        SecondaryColour: "16777215",
+        TertiaryColour: "16777215",
+        BackColour: "-2147483640",
+        Bold: "3",
+        Italic: "0",
+        BorderStyle: "2",
+        Outline: "2",
+        Shadow: "2",
+        Alignment: "2", // left, middle, right
+        MarginL: "40",
+        MarginR: "60",
+        MarginV: "40",
+      },
+    };
+
+    videoshow(images, videoOptions)
+      .audio(audioPath)
+      .save(videoPath)
+      .on("start", () => {
+        console.log("> Starting FFmpeg");
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("Error:", err);
+        console.error("ffmpeg stderr:", stderr);
+        reject(err);
+      })
+      .on("end", () => {
+        console.log("> FFmpeg closed");
+        resolve();
+      });
+  });
+}
 
 module.exports = video;

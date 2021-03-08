@@ -7,9 +7,9 @@ const scripts = {
 };
 
 const start = async () => {
-  // scripts.input();
-  // await scripts.text();
-  // await scripts.image();
+  scripts.input();
+  await scripts.text();
+  await scripts.image();
   await scripts.video();
 
   const content = scripts.state.load();
